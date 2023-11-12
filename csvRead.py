@@ -18,21 +18,20 @@ def lakeSize1(x):
             june = "-06-"
             july = "-07-"
             august = "-08-"
-            september = "-09-"
             date = x.columns[j]
             summer = re.search(june, str(date))
             summe = re.search(july, str(date))
             summ = re.search(august, str(date))
-            su = re.search(september, str(date))
             
           
-            if (summer or summe or summ or su) and waterSize != 0:
+            if (summer or summe or summ) and waterSize != 0:
                 d[h] = {"Size": waterSize, "Date": date}
                 break
         #breakpoint()
     return d
 def SecondSize(x):
     u = []
+    years = {}
     all_year_size = {}
     all_changes = {}
     change = []
@@ -44,20 +43,20 @@ def SecondSize(x):
             june = "-06-"
             july = "-07-"
             august = "-08-"
-            september = "-09-"
             date = x.columns[y]
             summer = re.search(june, str(date))
             summe = re.search(july, str(date))
             summ = re.search(august, str(date))
-            su = re.search(september, str(date))
             water = x.iloc[i,y]
           
-            if (summer or summe or summ or su) and water != 0:
+            if (summer or summe or summ) and water != 0:
                 if s[column_data[i]]["Size"] != water:
                     u.append(water)
-        all_year_size[column_data[i]] = u
+            all_year_size[column_data[i]] = {"Size": u, "Date": date}
+            years[column_data[i]] = water
+            
         
-        #breakpoint()
+    #breakpoint()
         aj = []
         for j in range (len(u)):
             
@@ -75,19 +74,28 @@ def SecondSize(x):
                 #print("Positive change")
                 change.append(float(minus))
                 aj.append(float(j))
-        all_changes[column_data[i]] = change
-        #converted = pandas.DataFrame(all_year_size)
-        #conv = np
-        plt.plot(aj, change)
-        plt.xlabel('Random')
-        plt.ylabel('Size')
-        plt.title(column_data[i])
-        plt.show()
-        
-        change = [] 
-        u = []
         breakpoint()
-    return u
+    #all_changes[] = change
+    #converted = pandas.DataFrame(all_year_size)
+    #conv = np
+    plt.plot(aj, change)
+    plt.xlabel('Random')
+    plt.ylabel('Size')
+    #plt.title(column_data[i])
+    #plt.show()
+    #df = pandas.DataFrame.from_dict(change, orient='index')
+    #breakpoint()
+    matrix = np.array(change).reshape((100, 49))
+    breakpoint()
+    tsne = TSNE(n_components=2, perplexity=10, learning_rate=200, random_state=42)
+    X_tsne = tsne.fit_transform(matrix)
+    plt.scatter(X_tsne[:, 0], X_tsne[:, 1])
+    plt.title('t-SNE Visualization')
+    plt.show()
+    change = [] 
+    u = []
+    breakpoint()
+    return all_year_size
 
 #saltLake = surfaceArea[surfaceArea["Hylak_id"]==67]
 #Lake = surfaceArea[surfaceArea["Hylak_id"]==60]
@@ -102,7 +110,7 @@ def SecondSize(x):
 #plt.savefig('Figure1.png')
 
 #(data to save to csv FE: Lake).to_csv
-area = pandas.read_csv("1_openwater_area.csv")
+area = pandas.read_csv("local-data/1_openwater_area.csv")
 take = lakeSize1(area)
 other = SecondSize(area)
 other
