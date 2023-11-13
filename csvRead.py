@@ -3,15 +3,15 @@ import numpy as np
 import matplotlib.pyplot as plt
 import re
 from sklearn.manifold import TSNE
-
+from MulticoreTSNE import MulticoreTSNE
 
 
 def lakeSize1(x):
-    
+   
     d = {}
     column_name = "Hylak_id"
     column_data = x[column_name]
-    for i in range (100):#x.shape[0]): 
+    for i in range (50000):#x.shape[0]): 
         h = column_data[i]
         for j in range(x.shape[1]): 
             waterSize = x.iloc[i,j]
@@ -24,76 +24,76 @@ def lakeSize1(x):
             summ = re.search(august, str(date))
             
           
-            if (summer or summe or summ) and waterSize != 0:
+            if (summer): #and waterSize != 0:
                 d[h] = {"Size": waterSize, "Date": date}
                 break
         #breakpoint()
     return d
 def SecondSize(x):
+    a = 50000
     u = []
+    kept = []
     years = {}
     all_year_size = {}
     all_changes = {}
     change = []
     s = lakeSize1(x)
-    column_name = "Hylak_id"
-    column_data = x[column_name]
-    for i in range(100):
-        for y in range(x.shape[1]):
-            june = "-06-"
-            july = "-07-"
-            august = "-08-"
+    column_data = x["Hylak_id"]
+    mat = np.ones((a, x.shape[1]))
+    for i in range(a):
+
+
+        years = {}
+        u = []
+        for y in range(1, x.shape[1]):
             date = x.columns[y]
-            summer = re.search(june, str(date))
-            summe = re.search(july, str(date))
-            summ = re.search(august, str(date))
+            #print(date)
             water = x.iloc[i,y]
-          
-            if (summer or summe or summ) and water != 0:
-                if s[column_data[i]]["Size"] != water:
-                    u.append(water)
-            all_year_size[column_data[i]] = {"Size": u, "Date": date}
-            years[column_data[i]] = water
-            
+            yy,mm,dd = date.split("-")
+            if yy not in years and mm == "06" and s[column_data[i]]["Date"] != date:
+                u.append(water)
+                years[yy] = water
+        #print(len(u))
+        if len(u) != 33:
+            print(years)
+            print(s[column_data[i]])
+            breakpoint()
+        assert(len(u) == 33)
+
+
+
+
+        change = [] 
         
-    #breakpoint()
         aj = []
+        var = 0
         for j in range (len(u)):
             
+            if int(s[column_data[i]]["Size"]) == 0:
+                var += 1
+                continue
             minus = float(u[j]) - float(s[column_data[i]]["Size"])
             minus = minus / float(s[column_data[i]]["Size"])
             minus = float(minus) * 100.0
+            kept.append(column_data[i])
+        
             
-            if minus <= 0:
-                #hi = int(s[column_data[i]]) - int(u[column_data[i]])
-                #hi = hi / int(s[column_data[i]])
-                #print("Negative change")
-                change.append(float(minus))
-                aj.append(float(j))
-            else:
-                #print("Positive change")
-                change.append(float(minus))
-                aj.append(float(j))
-        breakpoint()
-    #all_changes[] = change
-    #converted = pandas.DataFrame(all_year_size)
-    #conv = np
-    plt.plot(aj, change)
-    plt.xlabel('Random')
-    plt.ylabel('Size')
-    #plt.title(column_data[i])
-    #plt.show()
-    #df = pandas.DataFrame.from_dict(change, orient='index')
+            change.append(float(minus))
+            aj.append(float(j))
+        if var == 0:
+
+            all_changes[column_data[i]] = change
+            assert(len(change) == 33)
+    
+    mat = [values for values in all_changes.values()]
     #breakpoint()
-    matrix = np.array(change).reshape((100, 49))
-    breakpoint()
+    mat = np.array(mat)
     tsne = TSNE(n_components=2, perplexity=10, learning_rate=200, random_state=42)
-    X_tsne = tsne.fit_transform(matrix)
+    X_tsne = tsne.fit_transform(mat)
     plt.scatter(X_tsne[:, 0], X_tsne[:, 1])
     plt.title('t-SNE Visualization')
     plt.show()
-    change = [] 
-    u = []
+        
     breakpoint()
     return all_year_size
 
