@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import re
 from sklearn.manifold import TSNE
-from MulticoreTSNE import MulticoreTSNE
+#from MulticoreTSNE import MulticoreTSNE
 
 
 def lakeSize1(x):
@@ -11,7 +11,7 @@ def lakeSize1(x):
     d = {}
     column_name = "Hylak_id"
     column_data = x[column_name]
-    for i in range (50000):#x.shape[0]): 
+    for i in range (x.shape[0]):#x.shape[0]): 
         h = column_data[i]
         for j in range(x.shape[1]): 
             waterSize = x.iloc[i,j]
@@ -30,7 +30,7 @@ def lakeSize1(x):
         #breakpoint()
     return d
 def SecondSize(x):
-    a = 50000
+    a = x.shape[0]
     u = []
     kept = []
     years = {}
@@ -88,12 +88,15 @@ def SecondSize(x):
     mat = [values for values in all_changes.values()]
     #breakpoint()
     mat = np.array(mat)
-    tsne = TSNE(n_components=2, perplexity=10, learning_rate=200, random_state=42)
+    tsne = TSNE(n_components=2, perplexity=1, learning_rate=20, random_state=42)
     X_tsne = tsne.fit_transform(mat)
-    plt.scatter(X_tsne[:, 0], X_tsne[:, 1])
+    plt.xlabel("X")
+    plt.ylabel("Y")
+    plt.scatter(X_tsne[:, 0], X_tsne[:, 1], s = 0.0001)
     plt.title('t-SNE Visualization')
+    plt.savefig("t_SNE_all_lakes_Nov_14_2023.png")
     plt.show()
-        
+    
     breakpoint()
     return all_year_size
 
