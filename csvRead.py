@@ -3,6 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import re
 from sklearn.manifold import TSNE
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
 #from MulticoreTSNE import MulticoreTSNE
 
 
@@ -88,17 +90,29 @@ def SecondSize(x):
     mat = [values for values in all_changes.values()]
     #breakpoint()
     mat = np.array(mat)
-    tsne = TSNE(n_components=2, perplexity=1, learning_rate=20, random_state=42)
-    X_tsne = tsne.fit_transform(mat)
+    
+    
+    return mat
+def kmeans(mat):
+    scaler = StandardScaler()
+    mat_scaled = scaler.fit_transform(mat)
+    k = 10
+    kmeans = KMeans(n_clusters=k)
+    kmeans.fit(mat_scaled)
+    cluster_centers = kmeans.cluster_centers_
+    labels = kmeans.labels_
+    tSNE(mat_scaled, labels)
+    breakpoint()
+
+def tSNE(mat_scaled, cluster_labels):
+    tsne = TSNE(n_components=2, perplexity=10, learning_rate=20, random_state=42)
+    
     plt.xlabel("X")
     plt.ylabel("Y")
-    plt.scatter(X_tsne[:, 0], X_tsne[:, 1], s = 0.0001)
-    plt.title('t-SNE Visualization')
-    plt.savefig("t_SNE_all_lakes_Nov_14_2023.png")
+    plt.scatter(mat_scaled[:, 0], mat_scaled[:, 1], c=cluster_labels, cmap='viridis', alpha=0.7)
+    plt.title('k-means_visulization')
+    plt.savefig("k_means_400_lakes_Nov_18_2023.png")
     plt.show()
-    
-    breakpoint()
-    return all_year_size
 
 #saltLake = surfaceArea[surfaceArea["Hylak_id"]==67]
 #Lake = surfaceArea[surfaceArea["Hylak_id"]==60]
@@ -115,6 +129,9 @@ def SecondSize(x):
 #(data to save to csv FE: Lake).to_csv
 area = pandas.read_csv("local-data/1_openwater_area.csv")
 take = lakeSize1(area)
-other = SecondSize(area)
-other
-#breakpoint()
+surface_area_fraction = SecondSize(area)
+print("Finished")
+kmeans(surface_area_fraction[: 400])
+
+#tSNE(other)
+breakpoint()
