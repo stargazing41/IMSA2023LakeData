@@ -48,14 +48,15 @@ def lakeSize1(x, geo):
             june = "-06-"
             july = "-07-"
             december = "-12-"
+            january = "-01-"
             date = x.columns[j]
-           
+            
             #print(column_data[i])
             if geo[column_data[i]]["Hemishpere"] == "Northern":
                 summer = re.search(july, str(date))
             else:
             
-                winter = re.search(december, str(date))
+                winter = re.search(january, str(date))
             
             #if waterSize == 0 and i == 20:
                 #breakpoint()
@@ -72,9 +73,10 @@ def SecondSize(x, req):
     u = []
     kept = []
     years = {}
-    all_year_size = {}
+    all_year = {}
     all_changes = {}
     change = []
+    dead_lakes = []
     s = lakeSize1(x, req)
     column_data = x["Hylak_id"]
     mat = np.ones((a, x.shape[1]))
@@ -86,15 +88,26 @@ def SecondSize(x, req):
             #print(date)
             water = x.iloc[i,y]
             yy,mm,dd = date.split("-")
-            if yy not in years:
-                if req[column_data[i]]["Hemishpere"] == "Northern" and mm == "06":
+            if column_data[i] not in s:
+                dead_lakes.append(column_data[i])
+
+                continue
+            s_yy, s_mm, s_dd = s[column_data[i]]["Date"].split("-")
+            #breakpoint()
+            if int(s_yy) - int(yy) != 0:#yy not in years and water != 0:
+                if req[column_data[i]]["Hemishpere"] == "Northern" and mm == "07":
                     if s[column_data[i]]["Date"] != date:
                         u.append(water)
                         years[yy] = water
-                elif req[column_data[i]]["Hemishpere"] == "Southern" and mm == "12":
+                elif req[column_data[i]]["Hemishpere"] == "Southern" and mm == "01":
                     if s[column_data[i]]["Date"] != date:
                         u.append(water)
                         years[yy] = water
+                all_year[column_data[i]] = yy
+        if u == []:
+            continue
+        if len(u) != 33:
+            breakpoint()
         assert(len(u) == 33)
 
 
@@ -107,7 +120,7 @@ def SecondSize(x, req):
             
            
             minus = float(u[j]) - float(s[column_data[i]]["Size"])
-            print(s[column_data[i]], column_data[i])
+            
             minus = minus / float(s[column_data[i]]["Size"])
             minus = float(minus) * 100.0
             kept.append(column_data[i])
@@ -124,7 +137,7 @@ def SecondSize(x, req):
     #breakpoint()
     mat = np.array(mat)
     
-    breakpoint()
+    #breakpoint()
     return mat
 
 def kmeans(mat, k):
@@ -138,13 +151,13 @@ def kmeans(mat, k):
     breakpoint()
 
 def tSNE(mat_scaled, cluster_labels):
-    tsne = TSNE(n_components=2, perplexity=10, learning_rate=20, random_state=42)
-    mat_tsne = tsne.fit(mat_scaled)
+    tsne = TSNE(n_components=2, perplexity=0.5, learning_rate=20, random_state=42)
+    mat_tsne = tsne.fit_transform(mat_scaled)
     plt.xlabel("X")
     plt.ylabel("Y")
-    plt.scatter(mat_tsne[:, 0], mat_tsne[:, 1], c=cluster_labels, cmap='viridis', alpha=0.7)
-    plt.title('k-means_visulization')
-    plt.savefig("k_means_400_lakes_Nov_18_2023.png")
+    plt.scatter(mat_tsne[:, 0], mat_tsne[:, 1], c=cluster_labels, cmap='viridis', alpha=0.7, s = 0.1)
+    plt.title('K-Means Clustering of all Lakes')
+    plt.savefig("k_means_southern_and_northern_lakes_Nov_29_2023_diffrent_colors.png")
     plt.show()
 #saltLake = surfaceArea[surfaceArea["Hylak_id"]==67]
 #Lake = surfaceArea[surfaceArea["Hylak_id"]==60]
@@ -164,10 +177,10 @@ polygons_with_geolocation = pandas.read_csv("local-data/Hylakes_with_location.cs
 
 
 #print("Finished")
-#
+
 geolocate = get_geolocation(polygons_with_geolocation)
 hem = hemisphere(geolocate, polygons_with_geolocation)
 take = lakeSize1(area, hem)
 surface_area_fraction = SecondSize(area, hem)
-kmeans(surface_area_fraction, 10)
+kmeans(surface_area_fraction, 3)
 
