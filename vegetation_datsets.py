@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import datetime
 import json
+import os
 #I randomly choose lakes within a certain size.
 
 
@@ -24,12 +25,12 @@ def get_lakes_within_surface_area_ranges(hylak_dataf, mins, maxs):
     geolocation = geolocation.reset_index(drop=True)
     return geolocation
 
-veg_files = ["/home/derick/Downloads/ndvi3g_geo_v1_1_1985_0712.nc4","/home/derick/Downloads/ndvi3g_geo_v1_1_2001_0106.nc4", "/home/derick/Downloads/ndvi3g_geo_v1_1_2001_0712.nc4", "/home/derick/Downloads/ndvi3g_geo_v1_2_2018_0712.nc4"]
+
+rt_path = "/home/derick/Downloads/"
+veg_files = [rt_path + item for item in os.listdir(rt_path) if item.endswith(".nc4")]
+#["/home/derick/Downloads/ndvi3g_geo_v1_1_1985_0712.nc4","/home/derick/Downloads/ndvi3g_geo_v1_1_2001_0106.nc4", "/home/derick/Downloads/ndvi3g_geo_v1_1_2001_0712.nc4", "/home/derick/Downloads/ndvi3g_geo_v1_2_2018_0712.nc4"]
+
 geolocation = pd.read_csv("local-data/Hylakes_with_location.csv")
-
-
-
-
 
 ds = xr.open_mfdataset(veg_files, combine='by_coords')
 
@@ -60,6 +61,8 @@ ds = xr.open_mfdataset(veg_files, combine='by_coords')
 #Zhangdu lake Wuhan China Id = 15282
 #target_latitude = 30.642451
 #target_longitude = 114.701610
+
+
 
 minimum = 5
 maximum = 15
